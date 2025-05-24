@@ -1,30 +1,13 @@
-name: Deploy
+name: cd
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build:
-    name: Build and Test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "1.23.0"
-
-      - name: Build prod
-        run: scripts/buildprod.sh
-
   deploy:
-    name: Deploy to GCP
+    name: Deploy
     runs-on: ubuntu-latest
-    needs: build
 
     steps:
       - name: Check out code
@@ -33,20 +16,21 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23.0"
+          go-version: '1.23.0'
 
-      - name: Build prod
-        run: scripts/buildprod.sh
+      - name: Build app
+        run: ./scripts/buildprod.sh
 
-      - name: Authenticate to Google Cloud
-        id: auth
+      - id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Build and push image
-        run: |
-          gcloud builds submit --tag us-central1-docker.pkg.dev/notely-460810/notely-ar-repo/notely:latest .
+      - name: Use gcloud CLI
+        run: gcloud info
+
+      - name: Build and push Docker image
+        run: gcloud builds submit --tag REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG .
