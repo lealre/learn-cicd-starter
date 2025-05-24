@@ -27,6 +27,9 @@ jobs:
     needs: build
 
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v2
@@ -39,5 +42,6 @@ jobs:
       - name: Use gcloud CLI
         run: gcloud info
       
-      - name: Build image
-        run:  gcloud builds submit --tag us-central1-docker.pkg.dev/notely-460810/notely-ar-repo/notely:latest --file Dockerfile .
+      - name: Build and push image
+        run: |
+          gcloud builds submit --tag us-central1-docker.pkg.dev/notely-460810/notely-ar-repo/notely:latest .
